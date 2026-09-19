@@ -18,6 +18,17 @@ export async function updateUserRole(userId, formData) {
   revalidatePath("/admin/users");
 }
 
+export async function updateUserScope(userId, formData) {
+  await requireRole("admin");
+  const scopeMemberId = formData.get("scope_member_id")?.toString().trim() || null;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("profiles").update({ scope_member_id: scopeMemberId }).eq("id", userId);
+  if (error) throw error;
+
+  revalidatePath("/admin/users");
+}
+
 export async function createUserAction(prevState, formData) {
   await requireRole("admin");
   const email = formData.get("email")?.toString().trim();

@@ -1,17 +1,25 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth";
+import { getManageableMemberIds } from "@/lib/scope";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { deleteMember } from "./actions";
 
 export default async function AdminMembersPage() {
   const supabase = await createClient();
-  const { data: members, error } = await supabase
+  const profile = await getCurrentProfile();
+  const scopeIds = await getManageableMemberIds(supabase, profile);
+
+  let query = supabase
     .from("members")
     .select(
       "id, full_name, gender, date_of_birth, date_of_death, father:father_id(full_name), mother:mother_id(full_name)"
     )
     .order("full_name");
 
+  if (scopeIds) query = query.in("id", scopeIds);
+
+  const { data: members, error } = await query;
   if (error) throw error;
 
   return (
@@ -25,6 +33,13 @@ export default async function AdminMembersPage() {
           Add member
         </Link>
       </div>
+
+      {scopeIds ? (
+        <p className="text-xs text-ink-faint">
+          Showing only the branch you&apos;ve been assigned ({scopeIds.length}{" "}
+          {scopeIds.length === 1 ? "person" : "people"}).
+        </p>
+      ) : null}
 
       <div className="glass overflow-hidden rounded-3xl">
         <table className="w-full text-left text-sm">

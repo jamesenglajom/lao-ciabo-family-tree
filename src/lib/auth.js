@@ -3,8 +3,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * Returns the signed-in user's profile (id, email, full_name, role), or null
- * if there is no session. Server-only — call from Server Components/Actions.
+ * Returns the signed-in user's profile (id, email, full_name, role,
+ * scope_member_id), or null if there is no session. Server-only — call from
+ * Server Components/Actions.
  */
 export async function getCurrentProfile() {
   const supabase = await createClient();
@@ -16,7 +17,7 @@ export async function getCurrentProfile() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, email, full_name, role")
+    .select("id, email, full_name, role, scope_member_id")
     .eq("id", user.id)
     .single();
 

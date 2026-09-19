@@ -3,15 +3,16 @@ import { CreateUserForm } from "@/components/admin/create-user-form";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
-import { updateUserRole } from "./actions";
+import { updateUserRole, updateUserScope } from "./actions";
 
 export default async function AdminUsersPage() {
   const currentProfile = await requireRole("admin");
   const supabase = await createClient();
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("id, email, role, created_at")
-    .order("created_at");
+
+  const [{ data: profiles, error }, { data: members }] = await Promise.all([
+    supabase.from("profiles").select("id, email, role, scope_member_id, created_at").order("created_at"),
+    supabase.from("members").select("id, full_name").order("full_name"),
+  ]);
 
   if (error) throw error;
 
@@ -32,6 +33,7 @@ export default async function AdminUsersPage() {
             <tr className="border-b border-line text-xs uppercase tracking-wide text-ink-faint">
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Role</th>
+              <th className="px-5 py-3">Branch (managers only)</th>
               <th className="px-5 py-3" />
             </tr>
           </thead>
@@ -39,11 +41,10 @@ export default async function AdminUsersPage() {
             {(profiles ?? []).map((profile) => (
               <tr key={profile.id} className="border-b border-line last:border-0">
                 <td className="px-5 py-3 font-medium text-ink">{profile.email}</td>
-                <td className="px-5 py-3 text-ink-soft">{profile.role}</td>
                 <td className="px-5 py-3">
                   <form
                     action={updateUserRole.bind(null, profile.id)}
-                    className="flex items-center justify-end gap-2"
+                    className="flex items-center gap-2"
                   >
                     <select
                       name="role"
@@ -63,11 +64,43 @@ export default async function AdminUsersPage() {
                     </SubmitButton>
                   </form>
                 </td>
+                <td className="px-5 py-3">
+                  <form
+                    action={updateUserScope.bind(null, profile.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <select
+                      name="scope_member_id"
+                      defaultValue={profile.scope_member_id ?? ""}
+                      className="rounded-full border border-line bg-panel px-3 py-1.5 text-xs text-ink outline-none focus:border-accent"
+                    >
+                      <option value="">Full access (no restriction)</option>
+                      {(members ?? []).map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.full_name}
+                        </option>
+                      ))}
+                    </select>
+                    <SubmitButton
+                      pendingText={"Updating…"}
+                      className="text-xs font-medium text-accent hover:underline"
+                    >
+                      Update
+                    </SubmitButton>
+                  </form>
+                </td>
+                <td className="px-5 py-3" />
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <p className="text-xs text-ink-faint">
+        Setting a branch restricts a manager to creating/editing that person, their descendants, and
+        spouses who married into that line. Admins are always unrestricted regardless of this
+        setting.
+      </p>
     </div>
   );
 }
