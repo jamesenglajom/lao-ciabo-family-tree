@@ -11,7 +11,7 @@ const FamilyChartTree = dynamic(
 export const metadata = {
   title: "Family Tree",
   description:
-    "The Eng – Ciabo family tree — a D3-powered interactive chart that recenters on any person.",
+    "The Lao – Ciabo family tree — a D3-powered interactive chart that recenters on any person.",
   alternates: { canonical: "/family-tree" },
 };
 
@@ -22,7 +22,7 @@ export default async function FamilyTreePage() {
     <Container className="flex flex-col gap-6 py-10">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-          The Eng &ndash; Ciabo Family Tree
+          The Lao &ndash; Ciabo Family Tree
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-ink-soft">
           Drag to pan, scroll to zoom, and click any card to make that person the new center of

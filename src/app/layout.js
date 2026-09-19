@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://eng-ciabo-family.example";
-const SITE_NAME = "The Eng – Ciabo Family Tree";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lao-ciabo-family.example";
+const SITE_NAME = "The Lao – Ciabo Family Tree";
 const SITE_DESCRIPTION =
-  "An interactive family tree for the Eng and Ciabo families, built with family-chart.";
+  "An interactive family tree for the Lao and Ciabo families, built with family-chart.";
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -28,8 +28,8 @@ export const metadata = {
     template: `%s – ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: ["Eng family", "Ciabo family", "family tree", "genealogy", "Eng Ciabo"],
-  authors: [{ name: "The Eng - Ciabo Family" }],
+  keywords: ["Lao family", "Ciabo family", "family tree", "genealogy", "Lao Ciabo"],
+  authors: [{ name: "The Lao - Ciabo Family" }],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",

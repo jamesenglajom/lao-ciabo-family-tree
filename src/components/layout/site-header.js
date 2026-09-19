@@ -23,7 +23,7 @@ export function SiteHeader() {
           className="text-lg font-semibold tracking-tight text-ink"
           onClick={() => setOpen(false)}
         >
-          Eng <span className="text-accent">&#10022;</span> Ciabo
+          Lao <span className="text-accent">&#10022;</span> Ciabo
         </Link>
 
         <nav className="hidden items-center gap-1 sm:flex" aria-label="Primary">

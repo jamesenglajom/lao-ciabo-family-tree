@@ -15,7 +15,7 @@ export default async function AdminProtectedLayout({ children }) {
       <aside className="glass flex h-fit flex-col gap-6 rounded-3xl p-5 lg:w-64 lg:shrink-0">
         <div className="flex flex-col gap-1 px-2">
           <Link href="/" className="text-sm font-semibold text-ink">
-            Eng &#10022; Ciabo
+            Lao &#10022; Ciabo
           </Link>
           <span className="text-xs text-ink-faint">{profile.email}</span>
           <span className="w-fit rounded-full border border-line px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">

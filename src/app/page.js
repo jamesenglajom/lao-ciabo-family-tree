@@ -54,7 +54,7 @@ export default async function Home() {
             Family heritage platform
           </span>
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
-            The <span className="text-accent">Eng</span> &ndash;{" "}
+            The <span className="text-accent">Lao</span> &ndash;{" "}
             <span className="text-accent-2">Ciabo</span> Family Tree
           </h1>
           <p className="max-w-xl text-lg leading-relaxed text-ink-soft">

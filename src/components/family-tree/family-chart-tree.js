@@ -53,7 +53,7 @@ export function FamilyChartTree({ data }) {
     <div
       ref={containerRef}
       role="img"
-      aria-label="Eng and Ciabo family tree rendered with family-chart"
+      aria-label="Lao and Ciabo family tree rendered with family-chart"
       className="f3 h-full w-full"
     />
   );

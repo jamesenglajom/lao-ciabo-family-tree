@@ -1,4 +1,4 @@
--- The Eng - Ciabo Family Tree — Supabase schema, RLS, storage, and seed data.
+-- The Lao - Ciabo Family Tree — Supabase schema, RLS, storage, and seed data.
 -- Run this once in the Supabase SQL editor (Project -> SQL Editor -> New query).
 -- The two admin auth users referenced below were already created via the
 -- Admin API (see scripts/create-user.mjs) — this script only adds their
@@ -184,20 +184,20 @@ insert into public.profiles (id, email, role) values
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
--- Seed: sample Eng - Ciabo family (replace/delete once real records are in)
+-- Seed: sample Lao - Ciabo family (replace/delete once real records are in)
 -- ---------------------------------------------------------------------------
 insert into public.members (id, full_name, gender, date_of_birth, date_of_death, description) values
-  ('f8327e06-320a-4f20-a060-5d96425bed04', 'Gregorio Eng Sr.', 'M', '1936-04-12', '2011-08-03', 'Eng family founder.'),
-  ('aaf04f52-baaf-4f67-80cb-4ac9ee7a908e', 'Remedios Eng',     'F', '1939-11-02', '2015-01-20', 'Eng family founder.'),
+  ('f8327e06-320a-4f20-a060-5d96425bed04', 'Gregorio Lao Sr.', 'M', '1936-04-12', '2011-08-03', 'Lao family founder.'),
+  ('aaf04f52-baaf-4f67-80cb-4ac9ee7a908e', 'Remedios Lao',     'F', '1939-11-02', '2015-01-20', 'Lao family founder.'),
   ('7ce13fb2-dc21-4476-aa38-112a34ccfca0', 'Bienvenido Ciabo Sr.', 'M', '1934-02-18', '2009-06-30', 'Ciabo family founder.'),
   ('fc0a6fa8-76d3-46c8-b55f-9e3c8ea50721', 'Corazon Ciabo',    'F', '1937-07-09', null,          'Ciabo family founder.'),
-  ('c575b39a-47e1-49d9-b15b-d186851dbbfd', 'Ramon Eng',        'M', '1962-05-21', null,          null),
-  ('55f67499-5f67-465e-8d2b-e7e5f2564ce6', 'Luz Eng',          'F', '1964-10-15', null,          'Where the Eng and Ciabo lines met.'),
+  ('c575b39a-47e1-49d9-b15b-d186851dbbfd', 'Ramon Lao',        'M', '1962-05-21', null,          null),
+  ('55f67499-5f67-465e-8d2b-e7e5f2564ce6', 'Luz Lao',          'F', '1964-10-15', null,          'Where the Lao and Ciabo lines met.'),
   ('330ee70b-aab6-4c73-b496-ea56133a90ed', 'Teresita Villanueva', 'F', '1965-03-30', null,       null),
-  ('73bf703d-b5ff-4961-9286-269cf8237d40', 'Danilo Villanueva', 'M', '1963-12-08', null,         'Married into the Eng family.'),
+  ('73bf703d-b5ff-4961-9286-269cf8237d40', 'Danilo Villanueva', 'M', '1963-12-08', null,         'Married into the Lao family.'),
   ('db2b5ecc-0f6e-45ef-8ae6-cc529b137462', 'Ernesto Ciabo',    'M', '1967-01-25', null,          null),
   ('53523faa-b34d-4c90-9adc-af66eb84064b', 'Marites Ciabo',    'F', '1969-06-17', null,          'Married into the Ciabo family.'),
-  ('717b9785-ba8a-433e-af45-7bea8d8ac31d', 'Justin Eng',       'M', '1990-09-02', null,          null),
+  ('717b9785-ba8a-433e-af45-7bea8d8ac31d', 'Justin Lao',       'M', '1990-09-02', null,          null),
   ('37dfbb10-c1fa-4d0a-bca3-6c0d2cfaf94e', 'Andrea Domingo',   'F', '1993-08-11', null,          null),
   ('a9de7ae6-050e-46fb-8905-7045a52d44a3', 'Marco Domingo',    'M', '1991-04-04', null,          null),
   ('c20be62e-09e7-45ca-864d-57edcc0c8720', 'Patricia Villanueva', 'F', '1992-02-14', null,       null),
@@ -232,5 +232,5 @@ select least(a, b), greatest(a, b) from (
 -- Sample announcements ("Family Announcements" board)
 insert into public.reminders (type, title, description, event_date, location, related_member_id, is_published) values
   ('birth_announcement', 'Welcome, Sofia!', 'Sofia Domingo was born to Marco and Andrea. Mother and baby are doing well.', '2026-03-14', null, '929388d0-1154-473a-a89b-e9fc8e15d857', true),
-  ('reunion', '2026 Eng-Ciabo Family Reunion', 'Save the date for this year''s family reunion — details to follow.', '2026-12-27', 'Tagaytay', null, true),
-  ('death_announcement', 'In loving memory of Gregorio Eng Sr.', 'Remembering the Eng family founder on his anniversary.', '2011-08-03', null, 'f8327e06-320a-4f20-a060-5d96425bed04', true);
+  ('reunion', '2026 Lao-Ciabo Family Reunion', 'Save the date for this year''s family reunion — details to follow.', '2026-12-27', 'Tagaytay', null, true),
+  ('death_announcement', 'In loving memory of Gregorio Lao Sr.', 'Remembering the Lao family founder on his anniversary.', '2011-08-03', null, 'f8327e06-320a-4f20-a060-5d96425bed04', true);
