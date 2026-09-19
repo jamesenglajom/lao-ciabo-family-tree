@@ -1,0 +1,38 @@
+import { notFound } from "next/navigation";
+import { GlassPanel } from "@/components/ui/glass-panel";
+import { MemberForm } from "@/components/admin/member-form";
+import { createClient } from "@/lib/supabase/server";
+import { updateMember } from "../actions";
+
+export default async function EditMemberPage({ params }) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const [{ data: member }, { data: members }, { data: spousePairs }, { data: socialLinks }] = await Promise.all([
+    supabase.from("members").select("*").eq("id", id).single(),
+    supabase.from("members").select("id, full_name, gender").order("full_name"),
+    supabase.from("member_spouses").select("member_id, spouse_id").or(`member_id.eq.${id},spouse_id.eq.${id}`),
+    supabase.from("member_social_links").select("platform, url").eq("member_id", id),
+  ]);
+
+  if (!member) notFound();
+
+  const currentSpouseIds = (spousePairs ?? []).map((pair) =>
+    pair.member_id === id ? pair.spouse_id : pair.member_id
+  );
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-2xl font-semibold tracking-tight text-ink">Edit {member.full_name}</h1>
+      <GlassPanel hover={false} className="max-w-2xl p-8">
+        <MemberForm
+          action={updateMember.bind(null, id)}
+          member={member}
+          members={members ?? []}
+          currentSpouseIds={currentSpouseIds}
+          currentSocialLinks={socialLinks ?? []}
+        />
+      </GlassPanel>
+    </div>
+  );
+}

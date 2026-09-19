@@ -1,69 +1,140 @@
+import Link from "next/link";
 import Image from "next/image";
+import { Container } from "@/components/ui/container";
+import { GlassPanel } from "@/components/ui/glass-panel";
+import { BirthdayTile } from "@/components/home/birthday-tile";
+import { NewMembersTile } from "@/components/home/new-members-tile";
+import { AnnouncementsTile } from "@/components/home/announcements-tile";
+import { getHomeData } from "@/lib/home-data";
 
-export default function Home() {
+function AvatarCluster({ members, size = 56 }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <div className="flex -space-x-5">
+      {members.map((member, index) => (
         <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+          key={member.id}
+          src={member.avatar}
+          alt={member.full_name}
+          width={size}
+          height={size}
+          unoptimized
+          className="rounded-full border-2 border-canvas shadow-lg"
+          style={{
+            width: size,
+            height: size,
+            transform: `translateY(${index % 2 === 0 ? "0px" : "8px"}) rotate(${
+              (index - 3) * 3
+            }deg)`,
+            zIndex: members.length - index,
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      ))}
     </div>
+  );
+}
+
+export default async function Home() {
+  const { stats, birthdayCelebrants, newMembers, announcements, spotlightMembers } =
+    await getHomeData();
+  const currentYear = new Date().getFullYear();
+
+  const STATS = [
+    { label: "Generations", value: stats.generations },
+    { label: "Founding members", value: stats.foundingMembers },
+    { label: "Family members", value: stats.totalMembers },
+    { label: "Living members", value: stats.livingMembers },
+  ];
+
+  return (
+    <>
+      {/* Hero */}
+      <section className="relative overflow-hidden py-20 sm:py-28">
+        <Container className="flex flex-col items-start gap-8">
+          <span className="rounded-full border border-line bg-panel/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-accent">
+            Family heritage platform
+          </span>
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
+            The <span className="text-accent">Eng</span> &ndash;{" "}
+            <span className="text-accent-2">Ciabo</span> Family Tree
+          </h1>
+          <p className="max-w-xl text-lg leading-relaxed text-ink-soft">
+            Four generations, two founding families, one story. This is the home base for
+            preserving who came from whom.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href="/family-tree"
+              className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-ink transition-transform hover:scale-[1.03]"
+            >
+              Explore the family tree
+            </Link>
+          </div>
+
+          {spotlightMembers.length > 0 ? (
+            <div className="pt-6">
+              <AvatarCluster members={spotlightMembers} />
+            </div>
+          ) : null}
+        </Container>
+      </section>
+
+      {/* Bento grid */}
+      <section className="pb-24">
+        <Container>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[minmax(190px,auto)] lg:grid-cols-4">
+            {/* Feature tile */}
+            <GlassPanel className="flex flex-col justify-between gap-6 p-8 sm:col-span-2 lg:col-span-2 lg:row-span-2">
+              <div className="flex flex-col gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-accent-2">
+                  family-chart &middot; D3.js
+                </span>
+                <h3 className="text-2xl font-semibold tracking-tight text-ink">
+                  See the whole tree, beautifully rendered
+                </h3>
+                <p className="text-sm leading-relaxed text-ink-soft">
+                  A smooth, interactive chart that recenters on any person you click, with a
+                  searchable picker to jump straight to a name.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["Recenter on click", "Searchable", "MIT licensed"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-line px-3 py-1 text-xs text-ink-soft"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <Link
+                href="/family-tree"
+                className="inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-canvas transition-transform hover:scale-[1.03]"
+              >
+                Open the family tree
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </GlassPanel>
+
+            {/* Stat tiles */}
+            {STATS.map((stat) => (
+              <GlassPanel key={stat.label} className="flex flex-col justify-center gap-1 p-6">
+                <span className="text-4xl font-semibold tracking-tight text-ink">
+                  {stat.value}
+                </span>
+                <span className="text-xs font-medium uppercase tracking-wide text-ink-faint">
+                  {stat.label}
+                </span>
+              </GlassPanel>
+            ))}
+
+            {/* Live data tiles */}
+            <BirthdayTile members={birthdayCelebrants} />
+            <NewMembersTile members={newMembers} year={currentYear} />
+            <AnnouncementsTile announcements={announcements} className="sm:col-span-2 lg:col-span-2" />
+          </div>
+        </Container>
+      </section>
+    </>
   );
 }
