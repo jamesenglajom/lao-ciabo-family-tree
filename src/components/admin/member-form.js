@@ -1,5 +1,6 @@
 import { MemberPhotoField } from "@/components/admin/member-photo-field";
 import { SocialLinksEditor } from "@/components/admin/social-links-editor";
+import { SubmitButton } from "@/components/admin/submit-button";
 
 const inputClass =
   "rounded-2xl border border-line bg-panel px-4 py-2.5 text-sm text-ink outline-none focus:border-accent";
@@ -151,12 +152,12 @@ export function MemberForm({ action, member, members, currentSpouseIds = [], cur
         />
       </div>
 
-      <button
-        type="submit"
-        className="w-fit rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink transition-transform hover:scale-[1.02]"
+      <SubmitButton
+        pendingText={member ? "Saving…" : "Adding…"}
+        className="w-fit rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-ink transition-transform hover:scale-[1.02] disabled:opacity-60 disabled:hover:scale-100"
       >
         {member ? "Save changes" : "Add member"}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

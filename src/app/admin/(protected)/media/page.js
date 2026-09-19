@@ -2,6 +2,7 @@ import Image from "next/image";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { CopyUrlButton } from "@/components/admin/copy-url-button";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { uploadMedia, deleteMedia } from "./actions";
 
@@ -43,12 +44,12 @@ export default async function AdminMediaPage() {
               className="flex items-center gap-2"
             >
               <input type="file" name="file" accept="image/*" required className="text-sm text-ink-soft" />
-              <button
-                type="submit"
-                className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-ink"
+              <SubmitButton
+                pendingText={"Uploading…"}
+                className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-ink disabled:opacity-60"
               >
                 Upload
-              </button>
+              </SubmitButton>
             </form>
           </div>
 

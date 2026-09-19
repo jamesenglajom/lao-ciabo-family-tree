@@ -1,8 +1,6 @@
 import Image from "next/image";
 import { GlassPanel } from "@/components/ui/glass-panel";
 
-const DAY_FORMATTER = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
-
 export function NewMembersTile({ members, year }) {
   return (
     <GlassPanel className="flex flex-col gap-4 p-6">
@@ -27,12 +25,7 @@ export function NewMembersTile({ members, year }) {
                 unoptimized
                 className="h-10 w-10 rounded-full border border-line"
               />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-ink">{member.full_name}</span>
-                <span className="text-xs text-ink-faint">
-                  Born {DAY_FORMATTER.format(new Date(member.date_of_birth))}
-                </span>
-              </div>
+              <span className="text-sm font-medium text-ink">{member.full_name}</span>
             </li>
           ))}
         </ul>

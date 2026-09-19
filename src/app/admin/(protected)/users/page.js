@@ -1,5 +1,6 @@
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { CreateUserForm } from "@/components/admin/create-user-form";
+import { SubmitButton } from "@/components/admin/submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import { updateUserRole } from "./actions";
@@ -53,13 +54,13 @@ export default async function AdminUsersPage() {
                       <option value="manager">Manager</option>
                       <option value="admin">Admin</option>
                     </select>
-                    <button
-                      type="submit"
+                    <SubmitButton
                       disabled={profile.id === currentProfile.id}
+                      pendingText={"Updating…"}
                       className="text-xs font-medium text-accent hover:underline disabled:opacity-50"
                     >
                       Update
-                    </button>
+                    </SubmitButton>
                   </form>
                 </td>
               </tr>
