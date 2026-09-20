@@ -60,13 +60,17 @@ async function syncSocialLinks(supabase, memberId, links) {
 }
 
 export async function createMember(formData) {
-  await requireRole("admin", "manager");
+  const profile = await requireRole("admin", "manager");
   const supabase = await createClient();
   const fields = readMemberFields(formData);
   const spouseIds = formData.getAll("spouse_ids");
   const socialLinks = readSocialLinks(formData);
 
-  const { data: member, error } = await supabase.from("members").insert(fields).select("id").single();
+  const { data: member, error } = await supabase
+    .from("members")
+    .insert({ ...fields, created_by: profile.id })
+    .select("id")
+    .single();
   if (error) throw error;
 
   await syncSpouses(supabase, member.id, spouseIds);

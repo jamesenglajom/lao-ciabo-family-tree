@@ -1,5 +1,6 @@
 import { MemberPhotoField } from "@/components/admin/member-photo-field";
 import { SocialLinksEditor } from "@/components/admin/social-links-editor";
+import { SpouseEditor } from "@/components/admin/spouse-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
 
 const inputClass =
@@ -115,27 +116,7 @@ export function MemberForm({ action, member, members, currentSpouseIds = [], cur
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="spouse_ids" className={labelClass}>
-          Spouse(s)
-        </label>
-        <select
-          id="spouse_ids"
-          name="spouse_ids"
-          multiple
-          defaultValue={currentSpouseIds}
-          className={`${inputClass} h-32`}
-        >
-          {otherMembers.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.full_name}
-            </option>
-          ))}
-        </select>
-        <span className="text-xs text-ink-faint">
-          Hold Ctrl/Cmd to select more than one.
-        </span>
-      </div>
+      <SpouseEditor currentSpouseIds={currentSpouseIds} members={otherMembers} />
 
       <SocialLinksEditor currentLinks={currentSocialLinks} />
 
