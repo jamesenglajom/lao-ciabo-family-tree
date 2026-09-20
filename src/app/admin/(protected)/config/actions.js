@@ -65,11 +65,19 @@ export async function saveSiteSettingsAction(prevState, formData) {
     tree_title: text("tree_title"),
     tree_description: text("tree_description"),
     announcements_title: text("announcements_title"),
+    young_title: text("young_title"),
+    young_max_age: text("young_max_age") === null ? null : Number(text("young_max_age")),
     timezone: text("timezone"),
   };
 
   if (fields.timezone && !isValidTimeZone(fields.timezone)) {
     return { error: `"${fields.timezone}" isn't a valid timezone. Use a name like Asia/Manila or America/New_York.` };
+  }
+  if (
+    fields.young_max_age !== null &&
+    !(Number.isInteger(fields.young_max_age) && fields.young_max_age >= 1 && fields.young_max_age <= 18)
+  ) {
+    return { error: "The age limit must be a whole number from 1 to 18." };
   }
   if (fields.og_image_url && !/^https?:\/\//i.test(fields.og_image_url)) {
     return { error: "The share image must be a web address (http or https)." };
@@ -87,12 +95,13 @@ export async function saveSiteSettingsAction(prevState, formData) {
     .upsert({ id: true, ...fields, updated_by: profile.email }, { onConflict: "id" });
 
   if (error) {
-    return {
-      error:
-        error.code === "PGRST205"
-          ? "The site_settings table doesn't exist yet — run supabase/006_site_settings.sql in the Supabase SQL editor."
-          : error.message,
-    };
+    if (error.code === "PGRST205") {
+      return { error: "The site_settings table doesn't exist yet — run supabase/006_site_settings.sql in the Supabase SQL editor." };
+    }
+    if (error.code === "PGRST204") {
+      return { error: "The database is missing a newer settings column — run supabase/007_young_members_settings.sql in the Supabase SQL editor, then save again." };
+    }
+    return { error: error.message };
   }
 
   // Titles, meta tags, header, and footer are all read from these settings.

@@ -88,6 +88,7 @@ export default async function AdminConfigPage() {
                   ["Header logo", `${settings.brand.first} ✦ ${settings.brand.second}`],
                   ["Footer", settings.ownerName],
                   ["Family Tree page", settings.treeTitle],
+                  ["Youngest members card", `${settings.youngTitle} (younger than ${settings.youngMaxAge})`],
                   ["Share image", settings.ogImageUrl ? "Set" : "None"],
                   ["Search engines", settings.allowIndexing ? "Allowed" : "Blocked"],
                   ["Timezone", settings.timeZone],

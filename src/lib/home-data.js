@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { initialsAvatarDataUri } from "@/lib/avatar";
+import { ageInYears } from "@/lib/age";
+import { getSiteSettings } from "@/lib/site-settings";
 
 /** Longest chain of father/mother links back to a root ancestor, as a generation count. */
 function computeGenerationCount(members) {
@@ -44,9 +46,12 @@ export async function getHomeData() {
   const supabase = await createClient();
   const now = new Date();
   const currentMonth = now.getMonth() + 1;
-  const currentYear = now.getFullYear();
 
-  const [{ data: members, error: membersError }, { data: announcements, error: announcementsError }] =
+  const [
+    { data: members, error: membersError },
+    { data: announcements, error: announcementsError },
+    { youngMaxAge },
+  ] =
     await Promise.all([
       supabase
         .from("members")
@@ -58,6 +63,7 @@ export async function getHomeData() {
         .eq("is_published", true)
         .order("event_date", { ascending: false })
         .limit(6),
+      getSiteSettings(),
     ]);
 
   if (membersError) throw membersError;
@@ -74,8 +80,10 @@ export async function getHomeData() {
     )
     .map(withAvatar);
 
-  const newMembers = allMembers
-    .filter((m) => m.date_of_birth && new Date(m.date_of_birth).getFullYear() === currentYear)
+  // The youngest living members (younger than the configured age), newest arrivals first.
+  const youngMembers = allMembers
+    .filter((m) => !m.date_of_death && m.date_of_birth && ageInYears(m.date_of_birth, now) < youngMaxAge)
+    .sort((a, b) => b.date_of_birth.localeCompare(a.date_of_birth))
     .map(withAvatar);
 
   const stats = {
@@ -94,7 +102,7 @@ export async function getHomeData() {
   return {
     stats,
     birthdayCelebrants,
-    newMembers,
+    youngMembers,
     announcements: announcements ?? [],
     spotlightMembers,
   };

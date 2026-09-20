@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { BirthdayTile } from "@/components/home/birthday-tile";
-import { NewMembersTile } from "@/components/home/new-members-tile";
+import { YoungMembersTile } from "@/components/home/young-members-tile";
 import { AnnouncementsTile } from "@/components/home/announcements-tile";
 import { getHomeData } from "@/lib/home-data";
 import { getSiteSettings } from "@/lib/site-settings";
@@ -36,10 +36,9 @@ function AvatarCluster({ members, size = 56 }) {
 
 export default async function Home() {
   const [
-    { stats, birthdayCelebrants, newMembers, announcements, spotlightMembers },
+    { stats, birthdayCelebrants, youngMembers, announcements, spotlightMembers },
     settings,
   ] = await Promise.all([getHomeData(), getSiteSettings()]);
-  const currentYear = new Date().getFullYear();
 
   const STATS = [
     { label: "Generations", value: stats.generations },
@@ -145,7 +144,11 @@ export default async function Home() {
 
             {/* Live data tiles */}
             <BirthdayTile members={birthdayCelebrants} />
-            <NewMembersTile members={newMembers} year={currentYear} />
+            <YoungMembersTile
+              members={youngMembers}
+              title={settings.youngTitle}
+              maxAge={settings.youngMaxAge}
+            />
             <AnnouncementsTile
               title={settings.announcementsTitle}
               announcements={announcements}

@@ -202,6 +202,30 @@ export function SiteSettingsForm({ raw, resolved, timeZones }) {
           />
         </Field>
 
+        <Field id="young_title" label="Youngest-members heading" hint="The heading of the home page card listing the family's youngest members.">
+          <input
+            id="young_title"
+            name="young_title"
+            defaultValue={row.young_title ?? ""}
+            placeholder={resolved.youngTitle}
+            className={inputClass}
+          />
+        </Field>
+
+        <Field id="young_max_age" label="Youngest-members age limit" hint="Lists living members younger than this many years, youngest first. Whole number, 1–18.">
+          <input
+            id="young_max_age"
+            name="young_max_age"
+            type="number"
+            min={1}
+            max={18}
+            step={1}
+            defaultValue={row.young_max_age ?? ""}
+            placeholder={String(resolved.youngMaxAge)}
+            className={inputClass}
+          />
+        </Field>
+
         <Field id="timezone" label="Timezone" hint="Used for times shown in this admin, e.g. Asia/Manila. Blank = UTC.">
           <input
             id="timezone"

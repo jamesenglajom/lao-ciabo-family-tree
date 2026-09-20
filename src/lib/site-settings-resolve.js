@@ -29,6 +29,14 @@ export function isValidTimeZone(timeZone) {
   }
 }
 
+const DEFAULT_YOUNG_MAX_AGE = 5;
+
+// "Younger than N years" — anything outside 1–18 (or not a whole number) means the default.
+function resolveYoungMaxAge(value) {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= 1 && n <= 18 ? n : DEFAULT_YOUNG_MAX_AGE;
+}
+
 export function resolveSiteSettings(row) {
   const r = row ?? {};
 
@@ -94,6 +102,8 @@ export function resolveSiteSettings(row) {
       : `${whoTree}${via}, as an interactive chart that recenters on any person.`,
 
     announcementsTitle: clean(r.announcements_title) || "Family Announcements",
+    youngTitle: clean(r.young_title) || "Little Ones",
+    youngMaxAge: resolveYoungMaxAge(r.young_max_age),
     timeZone: isValidTimeZone(clean(r.timezone)) ? clean(r.timezone) : "UTC",
   };
 }

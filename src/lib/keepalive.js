@@ -7,9 +7,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // The server renders in UTC, so times are formatted in the timezone chosen in
 // the site settings (see /admin/config) and labelled with it, e.g. "GMT+8".
 export function formatPingTime(iso, timeZone = "UTC") {
+  // Individual fields, not dateStyle/timeStyle: those can't be combined with timeZoneName.
   return new Intl.DateTimeFormat("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
     timeZoneName: "short",
     timeZone,
   }).format(new Date(iso));
