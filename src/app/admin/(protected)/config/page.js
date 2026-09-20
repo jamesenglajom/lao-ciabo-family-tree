@@ -2,7 +2,13 @@ import { GlassPanel } from "@/components/ui/glass-panel";
 import { KeepAlivePingButton } from "@/components/admin/keepalive-ping-button";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
-import { formatPingTime, keepAliveStatus, timeAgo } from "@/lib/keepalive";
+import {
+  PING_COOLDOWN_DAYS,
+  formatPingTime,
+  keepAliveStatus,
+  pingAvailability,
+  timeAgo,
+} from "@/lib/keepalive";
 
 const STATUS_STYLES = {
   ok: "text-emerald-500",
@@ -36,6 +42,7 @@ export default async function AdminConfigPage() {
   const lastPing = pings[0] ?? null;
   const lastCronPing = lastCron.data?.[0] ?? null;
   const status = keepAliveStatus(lastPing?.triggered_at);
+  const availability = pingAvailability(lastPing?.triggered_at);
   const cronSecretSet = Boolean(process.env.CRON_SECRET);
 
   return (
@@ -57,7 +64,8 @@ export default async function AdminConfigPage() {
               <p className="max-w-2xl text-sm text-ink-soft">
                 Free Supabase projects are paused after about a week without activity. Pinging
                 writes one small row to the database, which counts as activity. Do it about once a
-                week &mdash; or let the automatic ping below handle it.
+                week &mdash; the button locks for {PING_COOLDOWN_DAYS} days after each ping &mdash; or
+                let the automatic ping below handle it.
               </p>
             </div>
 
@@ -93,7 +101,10 @@ export default async function AdminConfigPage() {
               </div>
             </dl>
 
-            <KeepAlivePingButton />
+            <KeepAlivePingButton
+              canPing={availability.canPing}
+              availableLabel={availability.availableAt ? formatPingTime(availability.availableAt) : null}
+            />
           </GlassPanel>
 
           <GlassPanel hover={false} className="flex flex-col gap-3 p-6">
