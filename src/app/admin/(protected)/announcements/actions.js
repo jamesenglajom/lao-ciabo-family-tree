@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media";
 
 function readReminderFields(formData) {
   const get = (key) => formData.get(key)?.toString().trim() || null;
@@ -23,6 +24,9 @@ function readReminderFields(formData) {
 async function uploadCoverIfProvided(supabase, reminderId, formData) {
   const file = formData.get("cover_image");
   if (!file || typeof file === "string" || file.size === 0) return undefined;
+  if (file.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`Cover image is too large — max ${MAX_UPLOAD_LABEL}.`);
+  }
 
   const path = `${reminderId}/${Date.now()}-${file.name}`;
   const { error } = await supabase.storage.from("reminder-media").upload(path, file, {

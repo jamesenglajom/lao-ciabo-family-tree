@@ -5,6 +5,7 @@ import { DeleteButton } from "@/components/admin/delete-button";
 import { SubmitButton } from "@/components/admin/submit-button";
 import { createClient } from "@/lib/supabase/server";
 import { uploadMedia, deleteMedia } from "./actions";
+import { MAX_UPLOAD_LABEL } from "@/lib/media";
 
 const BUCKETS = [
   { id: "member-photos", label: "Member Photos" },
@@ -38,19 +39,22 @@ export default async function AdminMediaPage() {
         <div key={bucket.id} className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-ink">{bucket.label}</h2>
-            <form
-              action={uploadMedia.bind(null, bucket.id)}
-              encType="multipart/form-data"
-              className="flex items-center gap-2"
-            >
-              <input type="file" name="file" accept="image/*" required className="text-sm text-ink-soft" />
-              <SubmitButton
-                pendingText={"Uploading…"}
-                className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-ink disabled:opacity-60"
+            <div className="flex flex-col items-end gap-1">
+              <form
+                action={uploadMedia.bind(null, bucket.id)}
+                encType="multipart/form-data"
+                className="flex items-center gap-2"
               >
-                Upload
-              </SubmitButton>
-            </form>
+                <input type="file" name="file" accept="image/*" required className="text-sm text-ink-soft" />
+                <SubmitButton
+                  pendingText={"Uploading…"}
+                  className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-accent-ink disabled:opacity-60"
+                >
+                  Upload
+                </SubmitButton>
+              </form>
+              <span className="text-xs text-ink-faint">Max file size: {MAX_UPLOAD_LABEL}.</span>
+            </div>
           </div>
 
           <GlassPanel hover={false} className="p-6">

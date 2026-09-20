@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media";
 
 const BUCKETS = ["member-photos", "reminder-media"];
 
@@ -24,6 +25,9 @@ export async function uploadMedia(bucket, formData) {
   const file = formData.get("file");
   if (!file || typeof file === "string" || file.size === 0) {
     return { error: "Choose a file to upload." };
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: `File is too large — max ${MAX_UPLOAD_LABEL}.` };
   }
 
   const supabase = await createClient();

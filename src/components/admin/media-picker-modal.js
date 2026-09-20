@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { uploadMedia } from "@/app/admin/(protected)/media/actions";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media";
 
 /**
  * A picker for choosing (or uploading) an image from a storage bucket.
@@ -59,6 +60,12 @@ export function MediaPickerModal({ open, bucket, onClose, onSelect }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(`File is too large — max ${MAX_UPLOAD_LABEL}.`);
+      event.target.value = "";
+      return;
+    }
+
     setUploading(true);
     setError(null);
     const formData = new FormData();
@@ -92,7 +99,7 @@ export function MediaPickerModal({ open, bucket, onClose, onSelect }) {
           </button>
         </div>
 
-        <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
+        <label className="mb-1 flex w-fit cursor-pointer items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
           {uploading ? "Uploading…" : "Upload new photo"}
           <input
             type="file"
@@ -102,6 +109,7 @@ export function MediaPickerModal({ open, bucket, onClose, onSelect }) {
             disabled={uploading}
           />
         </label>
+        <p className="mb-4 text-xs text-ink-faint">Max file size: {MAX_UPLOAD_LABEL}.</p>
 
         {error ? <p className="mb-4 text-sm font-medium text-red-500">{error}</p> : null}
 

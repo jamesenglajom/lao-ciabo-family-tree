@@ -1,5 +1,6 @@
 import { REMINDER_TYPES } from "@/lib/reminder-types";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { MAX_UPLOAD_LABEL } from "@/lib/media";
 
 const inputClass =
   "rounded-2xl border border-line bg-panel px-4 py-2.5 text-sm text-ink outline-none focus:border-accent";
@@ -84,6 +85,7 @@ export function ReminderForm({ action, reminder, members }) {
           Cover image
         </label>
         <input id="cover_image" name="cover_image" type="file" accept="image/*" className={inputClass} />
+        <span className="text-xs text-ink-faint">Max file size: {MAX_UPLOAD_LABEL}.</span>
       </div>
 
       <div className="flex flex-col gap-1.5">
