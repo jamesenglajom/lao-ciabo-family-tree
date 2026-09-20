@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/admin/announcements", label: "Announcements", roles: ["admin", "manager"] },
   { href: "/admin/media", label: "Media", roles: ["admin", "manager"] },
   { href: "/admin/users", label: "Users & Roles", roles: ["admin"] },
+  { href: "/admin/config", label: "Config", roles: ["admin"] },
 ];
 
 export function AdminNav({ role }) {
