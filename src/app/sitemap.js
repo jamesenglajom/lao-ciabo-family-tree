@@ -1,6 +1,13 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lao-ciabo-family.example";
+import { getSiteSettings } from "@/lib/site-settings";
+import { SITE_URL } from "@/lib/site-url";
 
-export default function sitemap() {
+// Depends on an admin-editable setting, so it can't be prerendered at build time.
+export const dynamic = "force-dynamic";
+
+export default async function sitemap() {
+  const { allowIndexing } = await getSiteSettings();
+  if (!allowIndexing) return [];
+
   const lastModified = new Date();
   const routes = ["", "/family-tree"];
 

@@ -6,6 +6,7 @@ import { BirthdayTile } from "@/components/home/birthday-tile";
 import { NewMembersTile } from "@/components/home/new-members-tile";
 import { AnnouncementsTile } from "@/components/home/announcements-tile";
 import { getHomeData } from "@/lib/home-data";
+import { getSiteSettings } from "@/lib/site-settings";
 
 function AvatarCluster({ members, size = 56 }) {
   return (
@@ -34,8 +35,10 @@ function AvatarCluster({ members, size = 56 }) {
 }
 
 export default async function Home() {
-  const { stats, birthdayCelebrants, newMembers, announcements, spotlightMembers } =
-    await getHomeData();
+  const [
+    { stats, birthdayCelebrants, newMembers, announcements, spotlightMembers },
+    settings,
+  ] = await Promise.all([getHomeData(), getSiteSettings()]);
   const currentYear = new Date().getFullYear();
 
   const STATS = [
@@ -51,16 +54,28 @@ export default async function Home() {
       <section className="relative overflow-hidden py-20 sm:py-28">
         <Container className="flex flex-col items-start gap-8">
           <span className="rounded-full border border-line bg-panel/70 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-accent">
-            Family heritage platform
+            {settings.heroEyebrow}
           </span>
           <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
-            The <span className="text-accent">Lao</span> &ndash;{" "}
-            <span className="text-accent-2">Ciabo</span> Family Tree
+            {settings.siteNameParts.before}
+            {settings.siteNameParts.accent ? (
+              <span className="text-accent">{settings.siteNameParts.accent}</span>
+            ) : null}
+            {settings.siteNameParts.after}
           </h1>
-          <p className="max-w-xl text-lg leading-relaxed text-ink-soft">
-            Four generations, two founding families, one story. This is the home base for
-            preserving who came from whom.
-          </p>
+          {settings.familyLines.length > 0 ? (
+            <ul aria-label="Family lines" className="flex flex-wrap gap-2">
+              {settings.familyLines.map((line) => (
+                <li
+                  key={line}
+                  className="rounded-full border border-line bg-panel/70 px-3.5 py-1 text-sm font-semibold text-accent-2"
+                >
+                  {line}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="max-w-xl text-lg leading-relaxed text-ink-soft">{settings.tagline}</p>
 
           <div className="flex flex-wrap items-center gap-4">
             <Link
@@ -131,7 +146,11 @@ export default async function Home() {
             {/* Live data tiles */}
             <BirthdayTile members={birthdayCelebrants} />
             <NewMembersTile members={newMembers} year={currentYear} />
-            <AnnouncementsTile announcements={announcements} className="sm:col-span-2 lg:col-span-2" />
+            <AnnouncementsTile
+              title={settings.announcementsTitle}
+              announcements={announcements}
+              className="sm:col-span-2 lg:col-span-2"
+            />
           </div>
         </Container>
       </section>

@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 
-export function SiteFooter() {
+export function SiteFooter({ ownerName }) {
   const year = new Date().getFullYear();
 
   return (
     <footer className="border-t border-line bg-canvas-soft">
       <Container className="flex flex-col gap-4 py-10 text-sm text-ink-faint sm:flex-row sm:items-center sm:justify-between">
         <p>
-          &copy; {year} The Lao &ndash; Ciabo Family. Built with{" "}
+          &copy; {year} {ownerName}. Built with{" "}
           <a
             className="text-ink-soft underline decoration-line underline-offset-4 hover:text-accent"
             href="https://nextjs.org"

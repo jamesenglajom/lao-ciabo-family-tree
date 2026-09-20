@@ -1,4 +1,4 @@
-import { MemberPhotoField } from "@/components/admin/member-photo-field";
+import { ImageField } from "@/components/admin/image-field";
 import { SocialLinksEditor } from "@/components/admin/social-links-editor";
 import { SpouseEditor } from "@/components/admin/spouse-editor";
 import { SubmitButton } from "@/components/admin/submit-button";
@@ -33,7 +33,7 @@ export function MemberForm({
         />
       </div>
 
-      <MemberPhotoField initialUrl={member?.photo_url} />
+      <ImageField name="photo_url" bucket="member-photos" initialUrl={member?.photo_url} />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">

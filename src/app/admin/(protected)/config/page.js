@@ -1,5 +1,7 @@
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { KeepAlivePingButton } from "@/components/admin/keepalive-ping-button";
+import { SiteSettingsForm } from "@/components/admin/site-settings-form";
+import { getSiteSettings } from "@/lib/site-settings";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import {
@@ -20,6 +22,9 @@ const STATUS_STYLES = {
 export default async function AdminConfigPage() {
   await requireRole("admin");
   const supabase = await createClient();
+  const settings = await getSiteSettings();
+  const timeZone = settings.timeZone;
+  const timeZones = Intl.supportedValuesOf("timeZone");
 
   const [recent, lastCron] = await Promise.all([
     supabase
@@ -49,6 +54,55 @@ export default async function AdminConfigPage() {
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold tracking-tight text-ink">Config</h1>
 
+      <section className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-lg font-semibold tracking-tight text-ink">Site settings</h2>
+          <p className="max-w-2xl text-sm text-ink-soft">
+            The name, titles and search/share details of this site. Deploy another copy against a
+            different Supabase project and set these here to make it a different family&apos;s site.
+          </p>
+        </div>
+
+        {settings.tableMissing ? (
+          <GlassPanel hover={false} className="p-6">
+            <p className="text-sm font-medium text-red-500">
+              The settings table doesn&apos;t exist yet. Run <code>supabase/006_site_settings.sql</code>{" "}
+              in the Supabase SQL editor, then reload. Until then the site uses built-in defaults.
+            </p>
+          </GlassPanel>
+        ) : (
+          <>
+            <GlassPanel hover={false} className="p-6">
+              <SiteSettingsForm raw={settings.raw} resolved={settings} timeZones={timeZones} />
+            </GlassPanel>
+
+            <GlassPanel hover={false} className="flex flex-col gap-3 p-6">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
+                What the site shows right now
+              </h3>
+              <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[10rem_1fr]">
+                {[
+                  ["Browser tab (home)", settings.homeTitle],
+                  ["Description", settings.description],
+                  ["Home heading", settings.siteName],
+                  ["Header logo", `${settings.brand.first} ✦ ${settings.brand.second}`],
+                  ["Footer", settings.ownerName],
+                  ["Family Tree page", settings.treeTitle],
+                  ["Share image", settings.ogImageUrl ? "Set" : "None"],
+                  ["Search engines", settings.allowIndexing ? "Allowed" : "Blocked"],
+                  ["Timezone", settings.timeZone],
+                ].map(([label, value]) => (
+                  <div key={label} className="contents">
+                    <dt className="text-ink-faint">{label}</dt>
+                    <dd className="text-ink">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </GlassPanel>
+          </>
+        )}
+      </section>
+
       {tableMissing ? (
         <GlassPanel hover={false} className="p-6">
           <p className="text-sm font-medium text-red-500">
@@ -77,7 +131,7 @@ export default async function AdminConfigPage() {
                 <dd className="text-sm text-ink">
                   {lastPing ? (
                     <>
-                      {formatPingTime(lastPing.triggered_at)}
+                      {formatPingTime(lastPing.triggered_at, timeZone)}
                       <span className="text-ink-faint"> &middot; {timeAgo(lastPing.triggered_at)}</span>
                       <span className="block text-xs text-ink-faint">
                         {lastPing.source === "cron" ? "Automatic (cron)" : "Manual"}
@@ -103,7 +157,7 @@ export default async function AdminConfigPage() {
 
             <KeepAlivePingButton
               canPing={availability.canPing}
-              availableLabel={availability.availableAt ? formatPingTime(availability.availableAt) : null}
+              availableLabel={availability.availableAt ? formatPingTime(availability.availableAt, timeZone) : null}
             />
           </GlassPanel>
 
@@ -111,14 +165,14 @@ export default async function AdminConfigPage() {
             <h2 className="text-lg font-semibold tracking-tight text-ink">Automatic ping</h2>
             <p className="max-w-2xl text-sm text-ink-soft">
               A Vercel Cron job calls <code>/api/cron/keepalive</code> every Monday and Thursday at
-              09:00 UTC (5:00 PM Philippine time). Twice a week rather than once, so a missed or
+              09:00 UTC. Twice a week rather than once, so a missed or
               delayed run can&apos;t let the gap reach a full week.
             </p>
             <p className="text-sm text-ink">
               Last automatic ping:{" "}
               {lastCronPing ? (
                 <>
-                  {formatPingTime(lastCronPing.triggered_at)}
+                  {formatPingTime(lastCronPing.triggered_at, timeZone)}
                   <span className="text-ink-faint"> &middot; {timeAgo(lastCronPing.triggered_at)}</span>
                 </>
               ) : (
@@ -151,7 +205,7 @@ export default async function AdminConfigPage() {
                 <tbody>
                   {pings.map((ping) => (
                     <tr key={ping.id} className="border-b border-line last:border-0">
-                      <td className="px-5 py-3 text-ink">{formatPingTime(ping.triggered_at)}</td>
+                      <td className="px-5 py-3 text-ink">{formatPingTime(ping.triggered_at, timeZone)}</td>
                       <td className="px-5 py-3 text-ink-soft">
                         {ping.source === "cron" ? "Automatic" : "Manual"}
                       </td>

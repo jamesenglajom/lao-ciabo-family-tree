@@ -1,4 +1,4 @@
--- The Lao - Ciabo Family Tree — Supabase schema, RLS, storage, and seed data.
+-- The Lao Family Tree — Supabase schema, RLS, storage, and seed data.
 -- Run this once in the Supabase SQL editor (Project -> SQL Editor -> New query).
 -- The two admin auth users referenced below were already created via the
 -- Admin API (see scripts/create-user.mjs) — this script only adds their
@@ -184,7 +184,7 @@ insert into public.profiles (id, email, role) values
 on conflict (id) do nothing;
 
 -- ---------------------------------------------------------------------------
--- Seed: sample Lao - Ciabo family (replace/delete once real records are in)
+-- Seed: sample family (replace/delete once real records are in)
 -- ---------------------------------------------------------------------------
 insert into public.members (id, full_name, gender, date_of_birth, date_of_death, description) values
   ('f8327e06-320a-4f20-a060-5d96425bed04', 'Gregorio Lao Sr.', 'M', '1936-04-12', '2011-08-03', 'Lao family founder.'),

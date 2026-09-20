@@ -11,7 +11,7 @@ import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media";
  * Deliberately has no delete/copy-URL actions — full media management lives
  * on /admin/media; this is just "set the image" for one record.
  */
-export function MediaPickerModal({ open, bucket, onClose, onSelect }) {
+export function MediaPickerModal({ open, bucket, onClose, onSelect, title = "Choose a photo" }) {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -93,14 +93,14 @@ export function MediaPickerModal({ open, bucket, onClose, onSelect }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-ink">Choose a photo</h2>
+          <h2 className="text-lg font-semibold text-ink">{title}</h2>
           <button type="button" onClick={onClose} className="text-sm text-ink-faint hover:text-ink">
             Close
           </button>
         </div>
 
         <label className="mb-1 flex w-fit cursor-pointer items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink">
-          {uploading ? "Uploading…" : "Upload new photo"}
+          {uploading ? "Uploading…" : "Upload new image"}
           <input
             type="file"
             accept="image/*"

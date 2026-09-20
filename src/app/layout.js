@@ -3,6 +3,8 @@ import "./globals.css";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { getSiteSettings } from "@/lib/site-settings";
+import { SITE_URL } from "@/lib/site-url";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,38 +18,40 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lao-ciabo-family.example";
-const SITE_NAME = "The Lao – Ciabo Family Tree";
-const SITE_DESCRIPTION =
-  "An interactive family tree for the Lao and Ciabo families, built with family-chart.";
+export async function generateMetadata() {
+  const s = await getSiteSettings();
+  const images = s.ogImageUrl ? [s.ogImageUrl] : undefined;
 
-export const metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: SITE_NAME,
-    template: `%s – ${SITE_NAME}`,
-  },
-  description: SITE_DESCRIPTION,
-  keywords: ["Lao family", "Ciabo family", "family tree", "genealogy", "Lao Ciabo"],
-  authors: [{ name: "The Lao - Ciabo Family" }],
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: "/",
-    siteName: SITE_NAME,
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_NAME,
-    description: SITE_DESCRIPTION,
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
-};
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: s.homeTitle,
+      template: `%s – ${s.siteName}`,
+    },
+    description: s.description,
+    keywords: s.keywords,
+    authors: [{ name: s.ownerName }],
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      url: "/",
+      siteName: s.siteName,
+      title: s.homeTitle,
+      description: s.description,
+      images,
+    },
+    twitter: {
+      card: images ? "summary_large_image" : "summary",
+      title: s.homeTitle,
+      description: s.description,
+      images,
+    },
+    robots: {
+      index: s.allowIndexing,
+      follow: s.allowIndexing,
+    },
+  };
+}
 
 export const viewport = {
   width: "device-width",
@@ -58,7 +62,9 @@ export const viewport = {
   ],
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const s = await getSiteSettings();
+
   return (
     <html
       lang="en"
@@ -69,9 +75,9 @@ export default function RootLayout({ children }) {
         <ThemeScript />
       </head>
       <body className="flex min-h-full flex-col bg-canvas text-ink">
-        <SiteHeader />
+        <SiteHeader brand={s.brand} />
         <main className="flex-1">{children}</main>
-        <SiteFooter />
+        <SiteFooter ownerName={s.ownerName} />
       </body>
     </html>
   );

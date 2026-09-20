@@ -4,15 +4,15 @@ const PAUSE_AFTER_DAYS = 7;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// The family is in the Philippines; Vercel renders in UTC, so pin a zone.
-const WHEN_FORMAT = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Manila",
-});
-
-export function formatPingTime(iso) {
-  return `${WHEN_FORMAT.format(new Date(iso))} (PH time)`;
+// The server renders in UTC, so times are formatted in the timezone chosen in
+// the site settings (see /admin/config) and labelled with it, e.g. "GMT+8".
+export function formatPingTime(iso, timeZone = "UTC") {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZoneName: "short",
+    timeZone,
+  }).format(new Date(iso));
 }
 
 export function timeAgo(iso) {

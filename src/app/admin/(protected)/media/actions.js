@@ -5,7 +5,12 @@ import { requireRole } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/media";
 
-const BUCKETS = ["member-photos", "reminder-media"];
+const BUCKETS = ["member-photos", "reminder-media", "site-assets"];
+
+// Site-wide assets (the share image) are admin-only; the other buckets are open to managers too.
+function rolesFor(bucket) {
+  return bucket === "site-assets" ? ["admin"] : ["admin", "manager"];
+}
 
 function sanitizeFileName(name) {
   return name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -19,8 +24,8 @@ function sanitizeFileName(name) {
  * modal), not just as a plain <form action>.
  */
 export async function uploadMedia(bucket, formData) {
-  await requireRole("admin", "manager");
   if (!BUCKETS.includes(bucket)) return { error: "Unknown bucket." };
+  await requireRole(...rolesFor(bucket));
 
   const file = formData.get("file");
   if (!file || typeof file === "string" || file.size === 0) {
@@ -44,8 +49,8 @@ export async function uploadMedia(bucket, formData) {
 }
 
 export async function deleteMedia(bucket, path) {
-  await requireRole("admin", "manager");
   if (!BUCKETS.includes(bucket)) return;
+  await requireRole(...rolesFor(bucket));
 
   const supabase = await createClient();
   const { error } = await supabase.storage.from(bucket).remove([path]);

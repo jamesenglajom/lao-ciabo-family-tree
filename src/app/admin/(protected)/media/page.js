@@ -6,12 +6,14 @@ import { SubmitButton } from "@/components/admin/submit-button";
 import { Pagination } from "@/components/admin/pagination";
 import { ADMIN_PAGE_SIZE, parsePage } from "@/lib/pagination";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth";
 import { uploadMedia, deleteMedia } from "./actions";
 import { MAX_UPLOAD_LABEL } from "@/lib/media";
 
-const BUCKETS = [
+const ALL_BUCKETS = [
   { id: "member-photos", label: "Member Photos", pageParam: "member-photos-page" },
   { id: "reminder-media", label: "Reminder Media", pageParam: "reminder-media-page" },
+  { id: "site-assets", label: "Site Assets (share image)", pageParam: "site-assets-page", adminOnly: true },
 ];
 
 // Storage listings don't return a total count, so fetch one extra item to
@@ -37,6 +39,8 @@ async function listBucketPage(supabase, bucket, page) {
 export default async function AdminMediaPage({ searchParams }) {
   const params = await searchParams;
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
+  const BUCKETS = ALL_BUCKETS.filter((bucket) => !bucket.adminOnly || profile?.role === "admin");
 
   const bucketPages = await Promise.all(
     BUCKETS.map(async (bucket) => {

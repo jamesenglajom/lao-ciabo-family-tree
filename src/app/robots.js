@@ -1,6 +1,16 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lao-ciabo-family.example";
+import { getSiteSettings } from "@/lib/site-settings";
+import { SITE_URL } from "@/lib/site-url";
 
-export default function robots() {
+// Reads a setting an admin can change, so it can't be prerendered at build time.
+export const dynamic = "force-dynamic";
+
+export default async function robots() {
+  const { allowIndexing } = await getSiteSettings();
+
+  if (!allowIndexing) {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: {
       userAgent: "*",

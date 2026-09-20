@@ -7,14 +7,14 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-export function AnnouncementsTile({ announcements, className = "" }) {
+export function AnnouncementsTile({ announcements, title, className = "" }) {
   return (
     <GlassPanel className={`flex flex-col gap-4 p-6 ${className}`}>
       <div className="flex flex-col gap-1">
         <span className="text-xs font-semibold uppercase tracking-wide text-accent">
           Stay in the loop
         </span>
-        <h3 className="text-lg font-semibold tracking-tight text-ink">Family Announcements</h3>
+        <h3 className="text-lg font-semibold tracking-tight text-ink">{title}</h3>
       </div>
 
       {announcements.length === 0 ? (

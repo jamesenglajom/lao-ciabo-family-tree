@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import * as f3 from "family-chart";
 import "family-chart/styles/family-chart.css";
 
-export function FamilyChartTree({ data }) {
+export function FamilyChartTree({ data, label = "Family tree" }) {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function FamilyChartTree({ data }) {
     <div
       ref={containerRef}
       role="img"
-      aria-label="Lao and Ciabo family tree rendered with family-chart"
+      aria-label={label}
       className="f3 h-full w-full"
     />
   );

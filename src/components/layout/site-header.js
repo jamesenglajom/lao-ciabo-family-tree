@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { href: "/family-tree", label: "Family Tree" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ brand }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -23,7 +23,7 @@ export function SiteHeader() {
           className="text-lg font-semibold tracking-tight text-ink"
           onClick={() => setOpen(false)}
         >
-          Lao <span className="text-accent">&#10022;</span> Ciabo
+          {brand.first} <span className="text-accent">&#10022;</span> {brand.second}
         </Link>
 
         <nav className="hidden items-center gap-1 sm:flex" aria-label="Primary">

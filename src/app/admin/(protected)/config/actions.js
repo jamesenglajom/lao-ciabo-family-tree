@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth";
 import { formatPingTime, pingAvailability } from "@/lib/keepalive";
+import { getSiteSettings } from "@/lib/site-settings";
+import { isValidTimeZone } from "@/lib/site-settings-resolve";
 import { createClient } from "@/lib/supabase/server";
 
 export async function pingSupabaseAction() {
@@ -20,7 +22,8 @@ export async function pingSupabaseAction() {
 
   const { canPing, availableAt } = pingAvailability(latest?.[0]?.triggered_at);
   if (!canPing) {
-    return { error: `Already pinged recently. Available again ${formatPingTime(availableAt)}.` };
+    const { timeZone } = await getSiteSettings();
+    return { error: `Already pinged recently. Available again ${formatPingTime(availableAt, timeZone)}.` };
   }
 
   // A real write, so it counts as project activity (not just a read).
@@ -31,5 +34,68 @@ export async function pingSupabaseAction() {
   if (error) return { error: error.message };
 
   revalidatePath("/admin/config");
+  return { success: true };
+}
+
+function splitList(value, separator) {
+  const items = (value ?? "")
+    .toString()
+    .split(separator)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return [...new Set(items)];
+}
+
+export async function saveSiteSettingsAction(prevState, formData) {
+  const profile = await requireRole("admin");
+
+  const text = (key) => formData.get(key)?.toString().trim() || null;
+
+  const fields = {
+    family_name: text("family_name"),
+    family_lines: splitList(formData.get("family_lines"), /\r?\n/),
+    site_name: text("site_name"),
+    hero_eyebrow: text("hero_eyebrow"),
+    tagline: text("tagline"),
+    meta_title: text("meta_title"),
+    meta_description: text("meta_description"),
+    meta_keywords: splitList(formData.get("meta_keywords"), ","),
+    og_image_url: text("og_image_url"),
+    allow_indexing: formData.get("allow_indexing") === "on",
+    tree_title: text("tree_title"),
+    tree_description: text("tree_description"),
+    announcements_title: text("announcements_title"),
+    timezone: text("timezone"),
+  };
+
+  if (fields.timezone && !isValidTimeZone(fields.timezone)) {
+    return { error: `"${fields.timezone}" isn't a valid timezone. Use a name like Asia/Manila or America/New_York.` };
+  }
+  if (fields.og_image_url && !/^https?:\/\//i.test(fields.og_image_url)) {
+    return { error: "The share image must be a web address (http or https)." };
+  }
+  if (fields.meta_title && fields.meta_title.length > 120) {
+    return { error: "The page title is too long (120 characters max) — search engines cut it off at about 60." };
+  }
+  if (fields.meta_description && fields.meta_description.length > 320) {
+    return { error: "The description is too long (320 characters max) — search engines show about 160." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert({ id: true, ...fields, updated_by: profile.email }, { onConflict: "id" });
+
+  if (error) {
+    return {
+      error:
+        error.code === "PGRST205"
+          ? "The site_settings table doesn't exist yet — run supabase/006_site_settings.sql in the Supabase SQL editor."
+          : error.message,
+    };
+  }
+
+  // Titles, meta tags, header, and footer are all read from these settings.
+  revalidatePath("/", "layout");
   return { success: true };
 }
