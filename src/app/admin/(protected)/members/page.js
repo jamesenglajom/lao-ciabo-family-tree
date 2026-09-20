@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { getManageableMemberIds } from "@/lib/scope";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { MemberPhotoChip } from "@/components/admin/member-photo-chip";
 import { Pagination } from "@/components/admin/pagination";
 import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { deleteMember } from "./actions";
@@ -20,7 +21,7 @@ export default async function AdminMembersPage({ searchParams }) {
   let query = supabase
     .from("members")
     .select(
-      "id, full_name, gender, date_of_birth, date_of_death, father:father_id(full_name), mother:mother_id(full_name)",
+      "id, full_name, photo_url, gender, date_of_birth, date_of_death, father:father_id(full_name), mother:mother_id(full_name)",
       { count: "exact" }
     )
     .order("updated_at", { ascending: false })
@@ -97,7 +98,12 @@ export default async function AdminMembersPage({ searchParams }) {
           <tbody>
             {(members ?? []).map((member) => (
               <tr key={member.id} className="border-b border-line last:border-0">
-                <td className="px-5 py-3 font-medium text-ink">{member.full_name}</td>
+                <td className="px-5 py-3 font-medium text-ink">
+                  <div className="flex items-center gap-3">
+                    <MemberPhotoChip name={member.full_name} photoUrl={member.photo_url} />
+                    <span>{member.full_name}</span>
+                  </div>
+                </td>
                 <td className="px-5 py-3 text-ink-soft">{member.gender}</td>
                 <td className="px-5 py-3 text-ink-soft">{member.date_of_birth ?? "—"}</td>
                 <td className="px-5 py-3 text-ink-soft">{member.date_of_death ?? "—"}</td>

@@ -1,7 +1,7 @@
 const MALE_GRADIENT = ["#63b3ff", "#0a84ff"];
 const FEMALE_GRADIENT = ["#e69bff", "#bf5af2"];
 
-function initialsOf(name) {
+export function initialsOf(name) {
   const parts = (name ?? "").trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0][0].toUpperCase();
