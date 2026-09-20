@@ -1,16 +1,26 @@
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { CreateUserForm } from "@/components/admin/create-user-form";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { Pagination } from "@/components/admin/pagination";
+import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth";
 import { updateUserRole, updateUserScope } from "./actions";
 
-export default async function AdminUsersPage() {
+export default async function AdminUsersPage({ searchParams }) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+  const { from, to } = pageRange(page);
+
   const currentProfile = await requireRole("admin");
   const supabase = await createClient();
 
-  const [{ data: profiles, error }, { data: members }] = await Promise.all([
-    supabase.from("profiles").select("id, email, role, scope_member_id, created_at").order("created_at"),
+  const [{ data: profiles, count, error }, { data: members }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, email, role, scope_member_id, created_at", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to),
     supabase.from("members").select("id, full_name").order("full_name"),
   ]);
 
@@ -95,6 +105,8 @@ export default async function AdminUsersPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} basePath="/admin/users" pageSize={ADMIN_PAGE_SIZE} totalCount={count ?? 0} />
 
       <p className="text-xs text-ink-faint">
         Setting a branch restricts a manager to creating/editing that person, their descendants, and

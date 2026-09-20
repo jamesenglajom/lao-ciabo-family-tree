@@ -3,9 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { getManageableMemberIds } from "@/lib/scope";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { Pagination } from "@/components/admin/pagination";
+import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { deleteMember } from "./actions";
 
-export default async function AdminMembersPage() {
+export default async function AdminMembersPage({ searchParams }) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+  const { from, to } = pageRange(page);
+
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   const scopeIds = await getManageableMemberIds(supabase, profile);
@@ -13,13 +19,15 @@ export default async function AdminMembersPage() {
   let query = supabase
     .from("members")
     .select(
-      "id, full_name, gender, date_of_birth, date_of_death, father:father_id(full_name), mother:mother_id(full_name)"
+      "id, full_name, gender, date_of_birth, date_of_death, father:father_id(full_name), mother:mother_id(full_name)",
+      { count: "exact" }
     )
-    .order("full_name");
+    .order("updated_at", { ascending: false })
+    .range(from, to);
 
   if (scopeIds) query = query.in("id", scopeIds);
 
-  const { data: members, error } = await query;
+  const { data: members, count, error } = await query;
   if (error) throw error;
 
   return (
@@ -89,6 +97,8 @@ export default async function AdminMembersPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination page={page} basePath="/admin/members" pageSize={ADMIN_PAGE_SIZE} totalCount={count ?? 0} />
     </div>
   );
 }

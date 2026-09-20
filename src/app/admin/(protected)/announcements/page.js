@@ -1,15 +1,22 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteButton } from "@/components/admin/delete-button";
+import { Pagination } from "@/components/admin/pagination";
+import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { reminderTypeLabel } from "@/lib/reminder-types";
 import { deleteAnnouncement } from "./actions";
 
-export default async function AdminAnnouncementsPage() {
+export default async function AdminAnnouncementsPage({ searchParams }) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePage(pageParam);
+  const { from, to } = pageRange(page);
+
   const supabase = await createClient();
-  const { data: announcements, error } = await supabase
+  const { data: announcements, count, error } = await supabase
     .from("reminders")
-    .select("id, type, title, event_date, is_published")
-    .order("event_date", { ascending: false });
+    .select("id, type, title, event_date, is_published", { count: "exact" })
+    .order("updated_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw error;
 
@@ -71,6 +78,13 @@ export default async function AdminAnnouncementsPage() {
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={page}
+        basePath="/admin/announcements"
+        pageSize={ADMIN_PAGE_SIZE}
+        totalCount={count ?? 0}
+      />
     </div>
   );
 }
