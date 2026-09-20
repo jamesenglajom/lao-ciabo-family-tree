@@ -29,6 +29,18 @@ export async function updateUserScope(userId, formData) {
   revalidatePath("/admin/users");
 }
 
+export async function resetUserPasswordAction(userId, prevState) {
+  await requireRole("admin");
+
+  const admin = createAdminClient();
+  const password = crypto.randomBytes(12).toString("base64url");
+
+  const { error } = await admin.auth.admin.updateUserById(userId, { password });
+  if (error) return { error: error.message };
+
+  return { success: true, password };
+}
+
 export async function createUserAction(prevState, formData) {
   await requireRole("admin");
   const email = formData.get("email")?.toString().trim();

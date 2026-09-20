@@ -1,6 +1,7 @@
 import { GlassPanel } from "@/components/ui/glass-panel";
 import { CreateUserForm } from "@/components/admin/create-user-form";
 import { SubmitButton } from "@/components/admin/submit-button";
+import { ResetPasswordButton } from "@/components/admin/reset-password-button";
 import { Pagination } from "@/components/admin/pagination";
 import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { createClient } from "@/lib/supabase/server";
@@ -44,7 +45,7 @@ export default async function AdminUsersPage({ searchParams }) {
               <th className="px-5 py-3">Email</th>
               <th className="px-5 py-3">Role</th>
               <th className="px-5 py-3">Branch (managers only)</th>
-              <th className="px-5 py-3" />
+              <th className="px-5 py-3">Password</th>
             </tr>
           </thead>
           <tbody>
@@ -99,7 +100,9 @@ export default async function AdminUsersPage({ searchParams }) {
                     </SubmitButton>
                   </form>
                 </td>
-                <td className="px-5 py-3" />
+                <td className="px-5 py-3 align-top">
+                  <ResetPasswordButton userId={profile.id} email={profile.email} />
+                </td>
               </tr>
             ))}
           </tbody>
