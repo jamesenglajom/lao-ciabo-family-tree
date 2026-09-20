@@ -26,6 +26,17 @@ export default async function EditMemberPage({ params }) {
 
   if (!member) notFound();
 
+  // Parents outside a scoped manager's branch (e.g. the branch root's own
+  // parents) can't be edited by them — show them read-only, not as a blank.
+  const outsideParentIds = scopeIds
+    ? [member.father_id, member.mother_id].filter((pid) => pid && !scopeIds.includes(pid))
+    : [];
+  const { data: outsideParents } = outsideParentIds.length
+    ? await supabase.from("members").select("id, full_name").in("id", outsideParentIds)
+    : { data: [] };
+  const lockedFather = outsideParents?.find((p) => p.id === member.father_id) ?? null;
+  const lockedMother = outsideParents?.find((p) => p.id === member.mother_id) ?? null;
+
   const currentSpouseIds = (spousePairs ?? []).map((pair) =>
     pair.member_id === id ? pair.spouse_id : pair.member_id
   );
@@ -40,6 +51,8 @@ export default async function EditMemberPage({ params }) {
           members={members ?? []}
           currentSpouseIds={currentSpouseIds}
           currentSocialLinks={socialLinks ?? []}
+          lockedFather={lockedFather}
+          lockedMother={lockedMother}
         />
       </GlassPanel>
     </div>

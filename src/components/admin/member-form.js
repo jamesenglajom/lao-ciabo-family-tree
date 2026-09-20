@@ -7,7 +7,15 @@ const inputClass =
   "rounded-2xl border border-line bg-panel px-4 py-2.5 text-sm text-ink outline-none focus:border-accent";
 const labelClass = "text-sm font-medium text-ink";
 
-export function MemberForm({ action, member, members, currentSpouseIds = [], currentSocialLinks = [] }) {
+export function MemberForm({
+  action,
+  member,
+  members,
+  currentSpouseIds = [],
+  currentSocialLinks = [],
+  lockedFather = null,
+  lockedMother = null,
+}) {
   const otherMembers = members.filter((m) => m.id !== member?.id);
 
   return (
@@ -77,44 +85,63 @@ export function MemberForm({ action, member, members, currentSpouseIds = [], cur
           <label htmlFor="father_id" className={labelClass}>
             Father
           </label>
-          <select
-            id="father_id"
-            name="father_id"
-            defaultValue={member?.father_id ?? ""}
-            className={inputClass}
-          >
-            <option value="">&mdash;</option>
-            {otherMembers
-              .filter((m) => m.gender === "M")
-              .map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.full_name}
-                </option>
-              ))}
-          </select>
+          {lockedFather ? (
+            <select id="father_id" disabled className={`${inputClass} opacity-60`}>
+              <option>{lockedFather.full_name}</option>
+            </select>
+          ) : (
+            <select
+              id="father_id"
+              name="father_id"
+              defaultValue={member?.father_id ?? ""}
+              className={inputClass}
+            >
+              <option value="">&mdash;</option>
+              {otherMembers
+                .filter((m) => m.gender === "M")
+                .map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.full_name}
+                  </option>
+                ))}
+            </select>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="mother_id" className={labelClass}>
             Mother
           </label>
-          <select
-            id="mother_id"
-            name="mother_id"
-            defaultValue={member?.mother_id ?? ""}
-            className={inputClass}
-          >
-            <option value="">&mdash;</option>
-            {otherMembers
-              .filter((m) => m.gender === "F")
-              .map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.full_name}
-                </option>
-              ))}
-          </select>
+          {lockedMother ? (
+            <select id="mother_id" disabled className={`${inputClass} opacity-60`}>
+              <option>{lockedMother.full_name}</option>
+            </select>
+          ) : (
+            <select
+              id="mother_id"
+              name="mother_id"
+              defaultValue={member?.mother_id ?? ""}
+              className={inputClass}
+            >
+              <option value="">&mdash;</option>
+              {otherMembers
+                .filter((m) => m.gender === "F")
+                .map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.full_name}
+                  </option>
+                ))}
+            </select>
+          )}
         </div>
       </div>
+
+      {lockedFather || lockedMother ? (
+        <p className="-mt-2 text-xs text-ink-faint">
+          A parent shown greyed out is outside your assigned branch, so only an admin can change it.
+          It stays linked when you save.
+        </p>
+      ) : null}
 
       <SpouseEditor currentSpouseIds={currentSpouseIds} members={otherMembers} />
 

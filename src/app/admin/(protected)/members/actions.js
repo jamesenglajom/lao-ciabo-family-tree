@@ -3,7 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth";
+import { getManageableMemberIds } from "@/lib/scope";
 import { createClient } from "@/lib/supabase/server";
+
+/**
+ * Decides a parent link's value on save. A branch-scoped manager's form can
+ * only offer people inside their branch, so a parent *above* it (e.g. the
+ * branch root's own father/mother) can't be shown in the dropdown — the
+ * browser would fall back to the blank option and submit "no parent",
+ * silently disconnecting the person from the tree. So:
+ *  - unrestricted (admin / manager with no branch): use what was submitted
+ *  - existing parent is outside the branch: locked, keep it as-is
+ *  - submitted parent is outside the branch: not allowed, keep existing
+ */
+function resolveParentId(existingId, submittedId, scopeIds) {
+  if (!scopeIds) return submittedId;
+  if (existingId && !scopeIds.includes(existingId)) return existingId;
+  if (submittedId && !scopeIds.includes(submittedId)) return existingId ?? null;
+  return submittedId;
+}
 
 function readMemberFields(formData) {
   const get = (key) => formData.get(key)?.toString().trim() || null;
@@ -28,15 +46,35 @@ function readSocialLinks(formData) {
     .filter((link) => link.url);
 }
 
-/** Replaces every spouse pairing for `memberId` with `spouseIds`, keeping the member_id < spouse_id ordering the schema requires. */
-async function syncSpouses(supabase, memberId, spouseIds) {
-  await supabase
+/**
+ * Replaces `memberId`'s spouse pairings with `spouseIds`, keeping the
+ * member_id < spouse_id ordering the schema requires. For a branch-scoped
+ * manager (`scopeIds` set) only pairings with people inside the branch are
+ * replaced; existing pairings with someone outside it (which the form can't
+ * display) are left untouched rather than deleted.
+ */
+async function syncSpouses(supabase, memberId, spouseIds, scopeIds) {
+  const canManage = (id) => !scopeIds || scopeIds.includes(id);
+
+  const { data: existing, error: fetchError } = await supabase
     .from("member_spouses")
-    .delete()
+    .select("member_id, spouse_id")
     .or(`member_id.eq.${memberId},spouse_id.eq.${memberId}`);
+  if (fetchError) throw fetchError;
+
+  const otherSide = (pair) => (pair.member_id === memberId ? pair.spouse_id : pair.member_id);
+  const removable = (existing ?? []).filter((pair) => canManage(otherSide(pair)));
+
+  if (removable.length > 0) {
+    const filter = removable
+      .map((pair) => `and(member_id.eq.${pair.member_id},spouse_id.eq.${pair.spouse_id})`)
+      .join(",");
+    const { error } = await supabase.from("member_spouses").delete().or(filter);
+    if (error) throw error;
+  }
 
   const rows = spouseIds
-    .filter((id) => id && id !== memberId)
+    .filter((id) => id && id !== memberId && canManage(id))
     .map((id) => ({
       member_id: memberId < id ? memberId : id,
       spouse_id: memberId < id ? id : memberId,
@@ -62,7 +100,10 @@ async function syncSocialLinks(supabase, memberId, links) {
 export async function createMember(formData) {
   const profile = await requireRole("admin", "manager");
   const supabase = await createClient();
+  const scopeIds = await getManageableMemberIds(supabase, profile);
   const fields = readMemberFields(formData);
+  fields.father_id = resolveParentId(null, fields.father_id, scopeIds);
+  fields.mother_id = resolveParentId(null, fields.mother_id, scopeIds);
   const spouseIds = formData.getAll("spouse_ids");
   const socialLinks = readSocialLinks(formData);
 
@@ -73,7 +114,7 @@ export async function createMember(formData) {
     .single();
   if (error) throw error;
 
-  await syncSpouses(supabase, member.id, spouseIds);
+  await syncSpouses(supabase, member.id, spouseIds, scopeIds);
   await syncSocialLinks(supabase, member.id, socialLinks);
 
   revalidatePath("/admin/members");
@@ -83,16 +124,29 @@ export async function createMember(formData) {
 }
 
 export async function updateMember(memberId, formData) {
-  await requireRole("admin", "manager");
+  const profile = await requireRole("admin", "manager");
   const supabase = await createClient();
+  const scopeIds = await getManageableMemberIds(supabase, profile);
   const fields = readMemberFields(formData);
   const spouseIds = formData.getAll("spouse_ids");
   const socialLinks = readSocialLinks(formData);
 
+  if (scopeIds) {
+    const { data: existing, error: existingError } = await supabase
+      .from("members")
+      .select("father_id, mother_id")
+      .eq("id", memberId)
+      .single();
+    if (existingError) throw existingError;
+
+    fields.father_id = resolveParentId(existing.father_id, fields.father_id, scopeIds);
+    fields.mother_id = resolveParentId(existing.mother_id, fields.mother_id, scopeIds);
+  }
+
   const { error } = await supabase.from("members").update(fields).eq("id", memberId);
   if (error) throw error;
 
-  await syncSpouses(supabase, memberId, spouseIds);
+  await syncSpouses(supabase, memberId, spouseIds, scopeIds);
   await syncSocialLinks(supabase, memberId, socialLinks);
 
   revalidatePath("/admin/members");
