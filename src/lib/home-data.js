@@ -85,7 +85,11 @@ export async function getHomeData() {
     generations: computeGenerationCount(allMembers),
   };
 
-  const spotlightMembers = allMembers.slice(0, 7).map(withAvatar);
+  // Hero chips only show members with a real uploaded photo, not the generated initials fallback.
+  const spotlightMembers = allMembers
+    .filter((m) => m.photo_url)
+    .slice(0, 7)
+    .map(withAvatar);
 
   return {
     stats,

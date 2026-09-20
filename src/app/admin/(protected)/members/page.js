@@ -8,9 +8,10 @@ import { ADMIN_PAGE_SIZE, pageRange, parsePage } from "@/lib/pagination";
 import { deleteMember } from "./actions";
 
 export default async function AdminMembersPage({ searchParams }) {
-  const { page: pageParam } = await searchParams;
-  const page = parsePage(pageParam);
+  const params = await searchParams;
+  const page = parsePage(params.page);
   const { from, to } = pageRange(page);
+  const search = typeof params.q === "string" ? params.q.trim() : "";
 
   const supabase = await createClient();
   const profile = await getCurrentProfile();
@@ -26,6 +27,8 @@ export default async function AdminMembersPage({ searchParams }) {
     .range(from, to);
 
   if (scopeIds) query = query.in("id", scopeIds);
+  // Escape LIKE wildcards so the search is a literal, case-insensitive substring match.
+  if (search) query = query.ilike("full_name", `%${search.replace(/[\\%_]/g, "\\$&")}%`);
 
   const { data: members, count, error } = await query;
   if (error) throw error;
@@ -42,10 +45,38 @@ export default async function AdminMembersPage({ searchParams }) {
         </Link>
       </div>
 
+      <form action="/admin/members" method="get" role="search" className="flex items-center gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={search}
+          placeholder="Search members by name"
+          aria-label="Search members by name"
+          className="w-full max-w-sm rounded-full border border-line bg-panel px-4 py-2 text-sm text-ink outline-none focus:border-accent"
+        />
+        <button
+          type="submit"
+          className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-ink"
+        >
+          Search
+        </button>
+        {search ? (
+          <Link href="/admin/members" className="text-sm font-medium text-accent hover:underline">
+            Clear
+          </Link>
+        ) : null}
+      </form>
+
       {scopeIds ? (
         <p className="text-xs text-ink-faint">
           Showing only the branch you&apos;ve been assigned ({scopeIds.length}{" "}
           {scopeIds.length === 1 ? "person" : "people"}).
+        </p>
+      ) : null}
+
+      {search ? (
+        <p className="text-xs text-ink-faint">
+          {count ?? 0} {count === 1 ? "result" : "results"} for &ldquo;{search}&rdquo;.
         </p>
       ) : null}
 
@@ -91,7 +122,7 @@ export default async function AdminMembersPage({ searchParams }) {
             {(members ?? []).length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-8 text-center text-ink-faint">
-                  No members yet.
+                  {search ? "No members match your search." : "No members yet."}
                 </td>
               </tr>
             ) : null}
@@ -100,7 +131,13 @@ export default async function AdminMembersPage({ searchParams }) {
         </div>
       </div>
 
-      <Pagination page={page} basePath="/admin/members" pageSize={ADMIN_PAGE_SIZE} totalCount={count ?? 0} />
+      <Pagination
+        page={page}
+        basePath="/admin/members"
+        pageSize={ADMIN_PAGE_SIZE}
+        totalCount={count ?? 0}
+        searchParams={params}
+      />
     </div>
   );
 }
