@@ -33,7 +33,8 @@ export default async function AdminAnnouncementsPage({ searchParams }) {
       </div>
 
       <div className="glass overflow-hidden rounded-3xl">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-150 text-left text-sm">
           <thead>
             <tr className="border-b border-line text-xs uppercase tracking-wide text-ink-faint">
               <th className="px-5 py-3">Title</th>
@@ -77,6 +78,7 @@ export default async function AdminAnnouncementsPage({ searchParams }) {
             ) : null}
           </tbody>
         </table>
+        </div>
       </div>
 
       <Pagination

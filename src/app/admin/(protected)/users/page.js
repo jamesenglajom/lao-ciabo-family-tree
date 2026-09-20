@@ -39,7 +39,8 @@ export default async function AdminUsersPage({ searchParams }) {
       </GlassPanel>
 
       <div className="glass overflow-hidden rounded-3xl">
-        <table className="w-full text-left text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-150 text-left text-sm">
           <thead>
             <tr className="border-b border-line text-xs uppercase tracking-wide text-ink-faint">
               <th className="px-5 py-3">Email</th>
@@ -107,6 +108,7 @@ export default async function AdminUsersPage({ searchParams }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <Pagination page={page} basePath="/admin/users" pageSize={ADMIN_PAGE_SIZE} totalCount={count ?? 0} />
