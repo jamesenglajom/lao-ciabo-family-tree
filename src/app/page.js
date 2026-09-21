@@ -19,7 +19,7 @@ function AvatarCluster({ members, size = 56 }) {
           width={size}
           height={size}
           unoptimized
-          className="rounded-full border-2 border-canvas shadow-lg"
+          className="rounded-full border-2 border-canvas object-cover object-center shadow-lg"
           style={{
             width: size,
             height: size,

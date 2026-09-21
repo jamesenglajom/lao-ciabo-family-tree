@@ -23,7 +23,7 @@ export function BirthdayTile({ members }) {
                 width={40}
                 height={40}
                 unoptimized
-                className="h-10 w-10 rounded-full border border-line"
+                className="h-10 w-10 shrink-0 rounded-full border border-line object-cover object-center"
               />
               <span className="text-sm font-medium text-ink">{member.full_name}</span>
             </li>
